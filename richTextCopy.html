@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>富文本编辑</title>
+</head>
+<body>
+    <textarea name="copyarea" id="copyarea" cols="80" rows="10"></textarea>
+    <button type="button" id="btn">Rich-Text-Copy!</button>
+    <div contenteditable="true" style="height: 500px;width: 100%;border:1px solid black;"></div>
+    <script>
+       (function() {
+            var template = ['<div style="font-weight: 900">',
+                '<p style="color:yellow">这里是富文本</p>',
+                '<p style="color:red">这里也是</p>',
+            '</div>'].join('');
+            var copyarea = document.getElementById('copyarea'),
+                btn = document.getElementById('btn');
+            
+            //先给textarea赋个值
+            copyarea.value = template;
+            
+            //将textarea中的内容放到剪贴板中
+            function copy() {
+                copyarea.select();
+                document.execCommand('copy');
+            }
+            //将剪切板中的文本转换为富文本
+            function RichTextExchange(e) {
+                e.preventDefault();
+                var target = event.target;
+                var val = target.value;
+                var clip = e.clipboardData || window.clipboardData;
+                //这个createControlRange只有IE有 判断是不是IE
+                if (document.body.createControlRange) {
+                    //创建这个控制范围
+                    var rang = document.body.createControlRange();
+                    var div = document.createElement('div');
+                    var styleObj = {
+                        width: '0px',
+                        height: '0px',
+                        position: 'absolute',
+                        visiable: 'hidden',
+                        opacity: '0'
+                    }
+                    //创建一个div 把需要复制的富文本放到这个div中
+                    div.innerHTML = val;
+                    //让这个div隐形
+                    for (var key in styleObj) {
+                        div.style[key] = styleObj[key];
+                    }
+                    //如果要将元素放到范围内 那么元素必须在文档内 否则range无法获取
+                    document.body.appendChild(div);
+                    rang.addElement(div.firstElementChild);
+                    //进行复制
+                    rang.execCommand('Copy');
+                    document.body.removeChild(div);
+                } else {
+                    clip.setData('text/html', val);
+                }
+            }
+            //绑定事件
+            btn.addEventListener('click', copy, false);
+            copyarea.addEventListener('copy', RichTextExchange, false);
+       })()
+    </script>
+</body>
+</html>

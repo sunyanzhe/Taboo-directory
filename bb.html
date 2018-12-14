@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <style>
+        #a{
+            width: 100px;
+            border: 1px solid blueviolet;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div id="a">
+        啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊
+    </div>
+    <script>
+        (function(window){
+            var div=document.getElementById('a');
+            getWidthOrHeight( div, 'height');
+            function getWidthOrHeight( elem, type ) {
+                const showCss = {display:'block',visibility:'hidden',position:'absolute'};
+                let view = elem.ownerDocument.defaultView || window,
+                    computed = view.getComputedStyle(elem),
+                    Type = 'offset' + type.replace(/^([a-z])/,str=>str.toUpperCase()), 
+                    reg=/[^\d]+/g,
+                    ret = undefined,
+                    prop;
+                if( computed ) {
+                     prop = computed.getPropertyValue(type);
+                    if( !prop.replace( reg , '' ) && !elem[Type] ) {
+                        swap( elem, showCss, function(elem){
+                            ret = elem[Type];
+                        })
+                    } else {
+                        ret = elem[Type];
+                    }
+                } else {
+                    prop = elem.style[tyoe];
+                    if( !prop.replace( reg , '' ) && elem[Type] ) {
+                        swap( elem, showCss, function(elem){
+                            ret = elem[Type];
+                        })
+                    } else {
+                        ret = elem[Type];
+                    }
+                }
+                console.log(ret);
+            }
+
+            function swap(elem,styleObj,calllback){
+                var oldStyle={};
+                for(var key in styleObj){
+                    oldStyle[key] = elem.style[key];
+		            elem.style[key] = styleObj[key];
+                }
+                calllback(elem);
+                for(var name in oldStyle){
+                    elem.style[name] = oldStyle[name];
+                }
+            }
+        })(window)
+    </script>
+    <script>
+    var str='mmasdasdasd';
+    var Str=str.replace(/^([a-zA-z])/,function(string){
+        return string.toLocaleUpperCase();
+    });
+    console.log(Str);
+    </script>
+</body>
+</html>

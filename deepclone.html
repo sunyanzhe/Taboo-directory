@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Deep clone</title>
+</head>
+<body>
+    <script>
+        let DeepClone = (value) => {
+            let type = typeof value;
+            let newone = undefined;      //因为数组要用到push 对象要用Object.keys  所以得是不用的类型 这里先定义undefined 在后面定义类型
+            if( type === 'string' || type === 'number' || type === 'boolean' ) {    //基础类型
+                newone = value;                                                     //基础类型直接等于就好了
+            } else if ( type === 'object' ) {                                       //堆类型
+                if ( value === null ) {
+                    newone = null;                                                  
+                } else if ( Object.prototype.toString.call(value).slice(8,-1) === 'Object' ) {  //对象要先将newone改为对象类型
+                    newone = {};
+                    for ( let key of Object.keys(value) ) {
+                        newone[key] = DeepClone(value[key]);                                    //递归直到值为基本类型
+                    }
+                } else if ( Object.prototype.toString.call(value).slice(8,-1) === 'Array' ) {   
+                    newone = [];                                                                //对象要先将newone改为数组类型
+                    for ( let i = 0; i < value.length; i++ ) {
+                        newone.push(DeepClone(value[i]))                                        //与对象同理
+                    }                                                                           //不用foreach是如果有undefined会有bug
+                }       
+            }
+            return newone
+        }
+        var people = {
+            name:'xxx',                                                 //基本数值
+            friends:['people1','people2','peopple3'],                   //数组
+            info:{                                                      //对象
+                phone:'133xxxxxxxx',
+                age:'18',
+                sex:'man'
+            }   
+        }
+        var people2 = DeepClone(people);
+        people2.info.phone = 11111111111;
+        console.log(people,people2);
+    </script>
+</body>
+</html>

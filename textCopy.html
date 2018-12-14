@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>文本复制</title>
+</head>
+<body>
+    <textarea name="copyarea" id="copyarea" cols="30" rows="10"></textarea>
+    <button id="btn" type="button">copy!</button>
+    <div contenteditable="true" style="height: 200px;width: 100%;border: 1px solid black"></div>
+    
+    <script>
+        (function() {
+            var btn = document.querySelector('#btn'),
+                copyarea = document.querySelector('#copyarea');
+
+            btn.addEventListener('click', thunk(copy, copyarea, 0, 4), false);
+            copyarea.addEventListener('copy', operateClip, false);
+
+            function operateClip(e) {
+                // 阻止冒泡和默认粘贴行为
+                e.preventDefault();
+                e.stopPropagation();
+
+                var target = e.target;
+                var clip = e.clipboardData || window.clipboardData;
+                var selectedText = '';
+                if (!clip) return;
+                //判断是不是IE9+
+                if (window.getSelection) {
+                    //IE这个坑 对这个方法没反应..
+                    // selectedText = window.getSelection().toString();
+                    selectedText = target.value.slice(target.selectionStart, target.selectionEnd);
+                } else {//如果是更坑爹的IE8
+                    selectedText = document.selection.createRange().text;
+                }
+
+                //加个后缀 稳妥!
+                selectedText += '\nby Sunyz';
+                clip.setData('text', selectedText);
+            }
+
+            function copy(target, start, end, event) {
+                if (!target) return;
+            
+                target.focus();
+                target.setSelectionRange(start, end);
+                document.execCommand('copy');
+                console.log(event.target);
+            }
+            
+            //试试怎么给addEventListener函数传参数,还保留event
+            function thunk(fn, ...args) {
+                return function(e) {
+                    fn.call(this, ...args, e)
+                }
+            }
+
+        })()
+    </script>
+</body>
+</html>

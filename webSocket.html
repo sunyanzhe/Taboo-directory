@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>WebSocket</title>
+</head>
+<body>
+    <script>
+        var WST = function(url) {
+            //检测是否兼容
+            if(!window.webSocket) {
+                console.log('This browser does not support WebSocket !')
+                return false;
+            }
+            this.webSocket = new WebSocket(url);
+            this.url = url;
+            //心跳所需参数
+            this.time = 60000;
+            this.msg = 'ping';
+            this.fnCache = {};
+            this.severTimeObj = null;
+            this.timeObj = null;
+            //心跳结束
+            //默认事件 可以自行配置
+            this.onopen = (fn) => {
+                fnCache.onopen = fn; 
+                this.webSocket.onopen = fn
+            };
+            this.onmessage = (fn) => {
+                fnCache.onmessage = fn;
+                this.webSocket.onmessage = fn;
+            };
+            this.onerror = (fn) => {
+                fnCache.onerror = fn;
+                this.webSocket.onerror = fn;
+            };
+            this.onclose = (fn) => {
+                fnCache.onclose = fn;
+                this.webSocket.onclose = fn;
+            }
+        }
+        WST.prototype = {
+            //在这里通过配置一个config对象
+            //将对象中的onopen onmessage onerror onclose绑定上
+            create: function(config) {
+                var self = this;
+                if (obj) {
+                    for (var key in config) {
+                        /onopen|onmessage|onerror|onclose/.test(key) ? 
+                            self[key](config[key]) :
+                            '';
+                    }
+                }
+                return self;
+            },
+            send: function(param) {
+                var ws = this.webSocket;
+                ws.send(param);
+            },
+            close: function(code, reason) {
+                var ws = this.webSocket;
+                ws.close(code, reason);
+            },
+            getOriginalWebSocket: function() {
+                return this.webSocket;
+            },
+            /**
+             *延迟时间 
+             *发送的message
+            */
+            heartStart: function(time, msg) {
+                var self = this,
+                    ws = self.webSocket;
+                if (time) self.time = time;
+                if (msg) self.msg = msg;
+                //先给服务器发送消息 如果服务器在time内返回了 则在onmessage中heartReset
+                //如果没有 则过一段时间重连
+                self.timeObj = setTimeout(function() {
+                    self.send(msg);
+                    self.severTimeObj = setTimeout(function() {
+                        self.reconnect();    
+                    }, time);
+                }, time);
+            },
+            //这个方法放在onmessage中,当检测到就执行 心跳重置 不管接到的是啥,
+            //因为只要接收到的了 那就说明没有断开连接
+            heartReset: function() {
+                var self = this,
+                    time = self.time,
+                    msg = self.msg;
+                clearTimeout(self.timeObj);
+                clearTimeout(self.severTimeObj);
+                self.heartStart(time, msg);
+            },
+            reconnect: function() {
+                var self = this,
+                    url = self.url,
+                    cache = self.fnCache;
+                //保险起见 清除一下延迟
+                if (self.timeObj) {
+                    clearTimeout(self.timeObj);
+                    clearTimeout(self.severTimeObj);
+                }
+                self.webSocket = new WebSocket(url);
+                self.create(cache);
+            }
+        }
+    </script>   
+    <script>
+        //使用方法
+        var wst = new WST('ws://127.0.0.1:81');
+        wst.create({
+            onopen: function(event) {
+                console.log(event);
+                //开启心跳
+                wst.heartStart(60000, 'pong!');
+            },
+            onmessage: function(event) {
+                console.log(event);
+                //重置心跳;
+                wst.heartReset()
+            },
+            onclose: function(event) {
+                console.log(event);
+                wst.reconnect();
+            }             
+        })
+    </script>
+</body>
+</html>

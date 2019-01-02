@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>DataView  二进制</title>
+</head>
+<body>
+    <script>
+        //主要讲讲 DataView(数据视图) ArrayBuffer(类型数组对象)
+        //1.ArrayBuffer
+        var buffer = new ArrayBuffer(8);
+        //这里的8 指的是8Byte的内存
+        //计算机里 1Byte === 8bit    可以表示0-255   也就是00000000  ----- 11111111 二进制
+        //ArrayBuffer没有什么API, 有点用的就是一个byteLength;
+        
+        console.log(buffer.byteLength);  //8
+
+        //这里的buffer只是一个容器 储存数据的容器, 想要操作这个容器 需要使用DataView
+        //有点像手枪和弹夹之间的关系.
+        //子弹就是内存,子弹要手动添加.弹夹是Buffer,它只是用来存储子弹的.手枪是DataView,它用来包裹弹夹,操作子弹
+
+        var view = new DataView(buffer);        //将buffer全部都放到DataView中
+        var view2 = new DataView(buffer, 4, 4);  //将从偏移量第4Byte的位置开始,之后的4Byte
+        //这两个DataView的实例是共享buffer的最后4Byte的内存的
+
+        //DataView有很多的方法, 基本都是一个功能就是存值.
+        //以setInt32为例
+        //首先set是放置;其次Int为整数型;最后32,这里的32指的是32bit等于4Btye 
+        //所以整个的意思就是放置一个整数型,需要4Btye的地方放置
+        //这个方法有两个参数第一个参数是偏移量,也就是你要放在哪里,这个开始点是哪里
+        //第二个参数为值
+
+        view.setInt32(4, 32);
+        //因为两个dataView的最后4Btye是共用的.
+        //也就是view2的第0位就是view的第4位;
+        console.log(view2.getInt32(0));     //32
+
+        
+    </script>
+</body>
+</html>

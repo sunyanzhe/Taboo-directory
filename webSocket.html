@@ -10,7 +10,7 @@
     <script>
         var WST = function(url) {
             //检测是否兼容
-            if(!window.webSocket) {
+            if(!window.WebSocket) {
                 console.log('This browser does not support WebSocket !')
                 return false;
             }
@@ -25,19 +25,19 @@
             //心跳结束
             //默认事件 可以自行配置
             this.onopen = (fn) => {
-                fnCache.onopen = fn; 
+                this.fnCache.onopen = fn; 
                 this.webSocket.onopen = fn
             };
             this.onmessage = (fn) => {
-                fnCache.onmessage = fn;
+                this.fnCache.onmessage = fn;
                 this.webSocket.onmessage = fn;
             };
             this.onerror = (fn) => {
-                fnCache.onerror = fn;
+                this.fnCache.onerror = fn;
                 this.webSocket.onerror = fn;
             };
             this.onclose = (fn) => {
-                fnCache.onclose = fn;
+                this.fnCache.onclose = fn;
                 this.webSocket.onclose = fn;
             }
         }
@@ -46,7 +46,7 @@
             //将对象中的onopen onmessage onerror onclose绑定上
             create: function(config) {
                 var self = this;
-                if (obj) {
+                if (config) {
                     for (var key in config) {
                         /onopen|onmessage|onerror|onclose/.test(key) ? 
                             self[key](config[key]) :
